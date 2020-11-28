@@ -4,10 +4,8 @@ from django.views import View
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from .send_mail import send_confirmation_email
 from .serializers import RegisterAPISerializer
-
+from apps.authentication.tasks import send_notification_task
 User = get_user_model()
 
 
@@ -19,7 +17,7 @@ class RegisterAPIView(APIView):
         if serializer.is_valid(raise_exception=True):
             user = serializer.save()
             if user:
-                send_confirmation_email(user)
+                send_notification_task.delay(user=user.id, seconds=10)
                 return Response(
                     serializer.data, status=status.HTTP_201_CREATED
                 )
