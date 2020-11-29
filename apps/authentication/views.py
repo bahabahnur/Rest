@@ -4,8 +4,13 @@ from django.views import View
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import RegisterAPISerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+from apps.authentication.serializers import (
+    RegisterAPISerializer, LoginSerializer)
 from apps.authentication.tasks import send_notification_task
+
+
 User = get_user_model()
 
 
@@ -36,3 +41,9 @@ class ActivationAPIView(View):
 
         except User.DoesNotExist:
             return render(request, 'accounts/exp.html', {})
+
+
+"""Логинь"""
+class LoginAPIView(TokenObtainPairView):
+    serializer_class = LoginSerializer
+
