@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from apps.authentication.serializers import (
-    RegisterAPISerializer, LoginSerializer)
+    RegisterAPISerializer, LoginSerializer, PasswordChacheSerializer)
 from apps.authentication.tasks import send_notification_task
 
 
@@ -43,7 +43,12 @@ class ActivationAPIView(View):
             return render(request, 'accounts/exp.html', {})
 
 
-"""Логинь"""
 class LoginAPIView(TokenObtainPairView):
+    """Логинь"""
     serializer_class = LoginSerializer
+
+
+class PasswordChanceAPIView(TokenObtainPairView):
+    """Меняем пароль"""
+    serializer_class = PasswordChacheSerializer
 

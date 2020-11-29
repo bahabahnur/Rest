@@ -50,7 +50,7 @@ class RegisterAPISerializer(serializers.ModelSerializer):
 class LoginSerializer(TokenObtainPairSerializer):
     """Создание сериалайзера для LoginAPIView"""
     password = serializers.CharField(
-        min_length=6, write_only=True
+        min_length=8, write_only=True
     )
     user_type = serializers.ChoiceField(
         choices=USER_TYPE_CHOICES
@@ -83,5 +83,29 @@ class LoginSerializer(TokenObtainPairSerializer):
 
         return attrs
 
+"""Спросить надо"""
 
+class PasswordChacheSerializer(TokenObtainPairSerializer):
+    """Создание сериалайзера для PasswordChanceAPIView"""
+    password = serializers.CharField(
+        min_length=8, required=True,
+        write_only=True, )
+    password_confirmation = serializers.CharField(
+        min_length=8, required=True,
+        write_only=True, )
+    user_type = serializers.ChoiceField(choices=USER_TYPE_CHOICES)
 
+    class Meta:
+        model = User
+        fields = ("password",
+                  "password_confirmation",
+                  "user_type")
+
+    """Проверка на совпадение пароля. И через поп удаляем password_confirmation"""
+    def validate(self, attrs):
+        password = attrs.get("password")
+        password_confirmation = attrs.pop("password_confirmation")
+
+        if password != password_confirmation:
+            raise serializers.ValidationError("Пароль не совпадают")
+        return attrs

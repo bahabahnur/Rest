@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'apps.authentication',
     'apps.category',
     'apps.products',
+    'apps.orders',
 ]
 AUTH_USER_MODEL = 'authentication.User'
 MIDDLEWARE = [
@@ -160,7 +161,9 @@ CELERY_TIMEZONE = 'Asia/Bishkek'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 2
 
 }
 # Django project settings.py
