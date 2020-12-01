@@ -1,5 +1,6 @@
 from django.db import models
 from apps.products.models import ProductsModel
+from apps.authentication.models import User
 
 
 class Order(models.Model):
@@ -10,6 +11,7 @@ class Order(models.Model):
     city = models.CharField(max_length=100, verbose_name='Страна/Город')
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    customer = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ('-created',)
@@ -26,8 +28,6 @@ class Order(models.Model):
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
     product = models.ForeignKey(ProductsModel, related_name='order_items', on_delete=models.CASCADE)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    quantity = models.PositiveIntegerField(verbose_name='Количество', default=1)
 
     def __str__(self):
         return '{}'.format(self.id)

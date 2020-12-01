@@ -23,6 +23,9 @@ urlpatterns = [
     path('api/v1/accounts/', include("apps.authentication.urls")),
     path('api/v1/categories/', include('apps.category.urls')),
     path('api/v1/products/', include('apps.products.urls')),
+    # path('api/v1/orders/', include('apps.orders.urls')),
+    path('api/v1/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
+
 ]
 
 if settings.DEBUG:
