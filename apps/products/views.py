@@ -1,16 +1,19 @@
 from datetime import timedelta
+
+from django.http.response import HttpResponseRedirect
 from django.utils import timezone
 from django.db.models import Q
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics, serializers
 from rest_framework.decorators import action
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from apps.products.models import ProductsModel
+from apps.products.models import ProductsModel, Wish
 from apps.products.permissions import IsOwner
-from apps.products.serializers import ProductsAPISerializer
+from apps.products.serializers import ProductsAPISerializer, WishAPISerializer
 
 
 class CustomerProductsAPIView(ListAPIView):
@@ -18,11 +21,11 @@ class CustomerProductsAPIView(ListAPIView):
     queryset = ProductsModel.objects.all()
     permission_classes = (IsAuthenticated,)
     serializer_class = ProductsAPISerializer
-    page_size = 4
+    page_size = 1
 
 
 class MyPaginationClass(PageNumberPagination):
-    page_size = 4
+    page_size = 1
 
     def get_paginated_response(self, data):
         for i in range(self.page_size):
@@ -66,6 +69,55 @@ class OwnerProductsViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
         queryset = queryset.filter(Q(title__icontains=q) |
                                    Q(description__icontains=q))
+        print(queryset)
         serializer = ProductsAPISerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+class WishListApiView(generics.ListCreateAPIView):
+    serializer_class = WishAPISerializer
+
+    def get_queryset(self):
+        queryset = Wish.objects.all()
+        return Wish.objects.filter(user=self.request.user.id)
+
+    def post(self, request, *args, **kwargs):
+        if len(request.data.keys()) == 1 and request.data.get('продукт'):
+            user = request.user.id
+            product = request.data['product']
+            favorites = Wish.objects.filter(product=product, user=user.id)
+            if favorites:
+                raise serializers.ValidationError('Товар в уже в избранных')
+            request.data['user'] = request.user.id
+
+        else:
+            raise serializers.ValidationError('Извините у вас ошибка')
+            pass
+        return self.create(request, *args, **kwargs)
+
+
+class WishAdd(APIView):
+
+    def get(self, request, pk):
+        product = ProductsModel.objects.get(pk=pk)
+        user = request.user
+        url = request.build_absolute_uri()
+        if Wish.objects.filter(user=user.id, product=pk):
+            raise serializers.ValidationError('ОК')
+        new_favorite = Wish.objects.create(user=user, product=product)
+        return HttpResponseRedirect(redirect_to=url)
+
+
+class WishDelete(APIView):
+
+    def get(self, request, pk):
+        user = request.user
+        print(user)
+        product = ProductsModel.objects.get(pk=pk)
+
+        favor = Wish.objects.filter(user=user.id, product=pk)
+        print(favor)
+        if favor:
+            favor.delete()
+            raise serializers.ValidationError('Удалили1')
+        raise serializers.ValidationError('Нету')

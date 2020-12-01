@@ -89,5 +89,5 @@ class ChangePasswordView(generics.UpdateAPIView):
 #
 #        def get(self, request, format=None):
 #            # simply delete the token to force a login
-#            request.user.auth_token.delete()
+#            request.user.token.delete()
 #            return Response(status=status.HTTP_200_OK)
